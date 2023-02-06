@@ -301,6 +301,7 @@ platform :ios do
     end
   end
 
+  # rubocop:disable Metrics/AbcSize
   def build_and_upload_installable_build(scheme:, output_app_name:, appcenter_app_name:, sentry_project_slug:)
     configuration = 'Release-Alpha'
 
@@ -375,6 +376,7 @@ platform :ios do
     buildkite_metadata(set: versions)
     buildkite_annotate(context: 'appcenter-info', style: 'info', message: versions.map { |k, v| " - **#{k}**: #{v}" }.join("\n"))
   end
+  # rubocop:enable Metrics/AbcSize
 
   def inject_buildkite_analytics_environment(xctestrun_path:)
     require 'plist'
