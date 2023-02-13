@@ -174,8 +174,8 @@ enum FeatureFlag: Int, CaseIterable, OverrideableFlag {
             return "enable_wordpress_support_forum"
         case .blaze:
             return "blaze"
-            default:
-                return nil
+        default:
+            return nil
         }
     }
 }
