@@ -46,6 +46,7 @@ enum FeatureFlag: Int, CaseIterable, OverrideableFlag {
     case wordPressSupportForum
     case jetpackIndividualPluginSupport
     case blaze
+    case sdkLessGoogleSignIn
 
     /// Returns a boolean indicating if the feature is enabled
     var enabled: Bool {
@@ -146,6 +147,8 @@ enum FeatureFlag: Int, CaseIterable, OverrideableFlag {
             return false
         case .blaze:
             return false
+        case .sdkLessGoogleSignIn:
+            return true
         }
     }
 
@@ -282,6 +285,8 @@ extension FeatureFlag {
             return "Jetpack Individual Plugin Support"
         case .blaze:
             return "Blaze"
+        case .sdkLessGoogleSignIn:
+            return "Sign-In with Google without the Google SDK"
         }
     }
 
