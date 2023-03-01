@@ -28,10 +28,29 @@ class GutenbergMediaInserterHelper: NSObject {
     }
 
     func insertFromSiteMediaLibrary(media: [Media], callback: @escaping MediaPickerDidPickMediaCallback) {
-        let formattedMedia = media.map { item in
-            return MediaInfo(id: item.mediaID?.int32Value, url: item.remoteURL, type: item.mediaTypeString, caption: item.caption, title: item.filename, alt: item.alt)
+        var mediaCollection: [MediaInfo] = []
+        let group = DispatchGroup()
+        media.forEach { item in
+            switch item.mediaType {
+            case .video:
+                group.enter()
+                EditorMediaUtility.fetchVideoPressMetadata(for: item, in: post) { (result) in
+                    switch result {
+                    case .failure:
+                        break
+                    case .success(let value):
+                        // TODO: Include metadata (value.originalURL)
+                        mediaCollection.append(MediaInfo(id: item.mediaID?.int32Value, url: value.originalURL?.absoluteString, type: item.mediaTypeString, caption: item.caption, title: item.filename, alt: item.alt))
+                    }
+                    group.leave()
+                }
+            default:
+                mediaCollection.append(MediaInfo(id: item.mediaID?.int32Value, url: item.remoteURL, type: item.mediaTypeString, caption: item.caption, title: item.filename, alt: item.alt))
+            }
         }
-        callback(formattedMedia)
+        group.notify(queue: .main) {
+            callback(mediaCollection)
+        }
     }
 
     func insertFromDevice(assets: [PHAsset], callback: @escaping MediaPickerDidPickMediaCallback) {
