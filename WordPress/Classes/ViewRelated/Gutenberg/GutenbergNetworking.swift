@@ -13,6 +13,24 @@ struct GutenbergNetworkRequest {
     }
 
     func request(completion: @escaping CompletionHandler) {
+        // Connect `/videos/$guid` endpoint request to Media Service
+        // API reference: https://developer.wordpress.com/docs/api/1.1/get/videos/%24guid/
+        let pattern = "^/wp/v2/media/videos/(?<id>\\w+)\\??.*"
+        let regex = try? NSRegularExpression(pattern: pattern)
+        if let match = regex?.firstMatch(in: path, options: [], range: NSRange(location: 0, length: path.utf8.count)) {
+            if let idRange = Range(match.range(withName: "id"), in: path) {
+                let videoPressID = String(path[idRange])
+                let mediaService = MediaService(managedObjectContext: ContextManager.sharedInstance().mainContext)
+                mediaService.getMetadataFromVideoPressID(videoPressID, in: blog, success: { (metadata) in
+                    completion(.success(metadata.toDict()))
+                }, failure: { (error) in
+                    DDLogError("Unable to fetch VideoPress token for VideoPress video with ID = \(videoPressID). Details: \(error.localizedDescription)")
+                    completion(.failure(NSError()))
+                })
+                return
+            }
+        }
+
         if blog.isAccessibleThroughWPCom(), let dotComID = blog.dotComID {
             dotComRequest(with: dotComID, completion: completion)
         } else {
